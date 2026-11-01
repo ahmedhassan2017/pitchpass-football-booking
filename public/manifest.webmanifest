@@ -1,0 +1,25 @@
+{
+  "name": "PitchPass Football Booking",
+  "short_name": "PitchPass",
+  "description": "Private real-time football match booking platform with strict 12-player capacity and instant cancellation alerts.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070b0e",
+  "theme_color": "#070b0e",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "social", "lifestyle"]
+}

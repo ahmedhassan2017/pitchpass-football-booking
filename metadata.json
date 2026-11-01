@@ -1,0 +1,6 @@
+{
+  "name": "PitchPass Football Booking",
+  "description": "Premium real-time match reservation platform for private football circles with capacity-limited bookings and instant cancellation alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

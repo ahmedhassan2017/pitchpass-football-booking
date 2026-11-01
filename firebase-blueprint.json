@@ -1,0 +1,133 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Authenticated user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 1024 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "lastLoginAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "email", "displayName", "createdAt"]
+    },
+    "Group": {
+      "title": "Group",
+      "description": "Private football group settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "ownerEmail": { "type": "string", "maxLength": 256 },
+        "inviteCode": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "ownerId", "inviteCode", "createdAt"]
+    },
+    "Membership": {
+      "title": "Membership",
+      "description": "Group membership and RBAC role status (doc id: {groupId}_{userId})",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 256 },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 1024 },
+        "role": { "type": "string", "enum": ["owner", "admin", "member"] },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "requestedAt": { "type": "string", "maxLength": 64 },
+        "reviewedAt": { "type": "string", "maxLength": 64 },
+        "reviewedBy": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["groupId", "userId", "displayName", "role", "status", "requestedAt"]
+    },
+    "Match": {
+      "title": "Match",
+      "description": "Football match schedule and booking state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 120 },
+        "location": { "type": "string", "maxLength": 200 },
+        "scheduledStartTime": { "type": "string", "maxLength": 64 },
+        "scheduledEndTime": { "type": "string", "maxLength": 64 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "maxPlayers": { "type": "number" },
+        "confirmedCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["open", "full", "cancelled", "completed"] },
+        "createdById": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["groupId", "title", "location", "scheduledStartTime", "maxPlayers", "confirmedCount", "status", "createdById", "createdAt"]
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "description": "Player confirmed match booking (doc id: {matchId}_{userId})",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 256 },
+        "matchId": { "type": "string", "maxLength": 128 },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userAvatar": { "type": "string", "maxLength": 1024 },
+        "bookedAt": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["confirmed", "cancelled"] }
+      },
+      "required": ["matchId", "groupId", "userId", "userName", "bookedAt", "status"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Activity broadcast and cancellation opening alerts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["cancellation_opened", "match_updated", "match_cancelled", "member_approved", "general"] },
+        "matchId": { "type": "string", "maxLength": 128 },
+        "actorId": { "type": "string", "maxLength": 128 },
+        "actorName": { "type": "string", "maxLength": 100 },
+        "title": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "readBy": { "type": "array" }
+      },
+      "required": ["groupId", "type", "actorName", "title", "message", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "/groups/{groupId}": {
+      "schema": "Group",
+      "description": "Private football groups"
+    },
+    "/memberships/{membershipId}": {
+      "schema": "Membership",
+      "description": "Group membership records"
+    },
+    "/matches/{matchId}": {
+      "schema": "Match",
+      "description": "Football matches"
+    },
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Confirmed match bookings"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Activity broadcasts and instant spot notifications"
+    }
+  }
+}
