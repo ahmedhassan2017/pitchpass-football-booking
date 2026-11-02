@@ -126,9 +126,6 @@ export const MyBookingsView: React.FC<MyBookingsViewProps> = ({ onNavigateToMatc
               {t.activeSpotsCount(bookedMatches.length)}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {t.oneSpotPerMatchNotice}
-          </p>
         </div>
       </div>
 

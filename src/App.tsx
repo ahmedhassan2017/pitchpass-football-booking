@@ -5,7 +5,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { ProfileModal } from './components/ProfileModal';
-import { OwnerBootstrapBanner } from './components/OwnerBootstrapBanner';
 import { GuestGate } from './components/GuestGate';
 import { UpcomingMatchesView } from './components/views/UpcomingMatchesView';
 import { MyBookingsView } from './components/views/MyBookingsView';
@@ -106,7 +105,7 @@ const MainAppContent: React.FC = () => {
       {liveAlert && (
         <aside 
           aria-label={isRTL ? "تنبيه فوري لفتح مكان" : "Live Spot Opened Alert"}
-          className="sticky top-16 z-50 px-4 py-2 max-w-5xl mx-auto w-full animate-in slide-in-from-top-4 duration-300"
+          className="sticky top-16 z-50 px-4 py-2 w-full animate-in slide-in-from-top-4 duration-300"
         >
           <div className="bg-gradient-to-r from-emerald-950/95 via-slate-900/95 to-teal-950/95 border-2 border-emerald-500/80 rounded-2xl p-3.5 sm:p-4 shadow-2xl shadow-emerald-950/80 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -155,7 +154,7 @@ const MainAppContent: React.FC = () => {
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
+      <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-7">
         {/* PWA Install Banner */}
         <PwaInstallBanner />
 
@@ -167,9 +166,6 @@ const MainAppContent: React.FC = () => {
             <Navigation activeTab={activeTab} onTabChange={setActiveTab} unreadCount={unreadCount} />
 
             <div className="mt-6">
-              {/* Special Owner Bootstrap notification if applicable */}
-              <OwnerBootstrapBanner />
-
               {/* View Router */}
               {activeTab === 'matches' && <UpcomingMatchesView />}
               {activeTab === 'bookings' && <MyBookingsView onNavigateToMatches={() => setActiveTab('matches')} />}

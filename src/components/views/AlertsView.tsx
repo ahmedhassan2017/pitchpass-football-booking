@@ -133,9 +133,6 @@ export const AlertsView: React.FC = () => {
               {t.unreadBadge(unreadCount)}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {t.alertsSubheader}
-          </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">

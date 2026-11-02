@@ -17,7 +17,6 @@ import {
   Sparkles,
   Zap,
   Trash2,
-  TestTube,
   MessageCircle,
   Share2,
 } from 'lucide-react';
@@ -30,6 +29,7 @@ import {
 } from '../../services/bookingService';
 import { subscribeToGroupMemberships } from '../../services/groupService';
 import { DEFAULT_GROUP_ID } from '../../firebase/config';
+import { getWriteErrorMessage } from '../../firebase/connection';
 
 interface MatchDetailsModalProps {
   match: Match | null;
@@ -50,10 +50,23 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<{
+    type: 'cancel_match' | 'cancel_spot' | 'reopen_match';
+    targetUserId?: string;
+    targetUserName?: string;
+  } | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [confirmationError, setConfirmationError] = useState<string | null>(null);
   const [membersMap, setMembersMap] = useState<
     Record<string, { photoURL?: string | null; displayName?: string }>
   >({});
+
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmation(null);
+      setConfirmationError(null);
+    }
+  }, [isOpen]);
 
   // Subscribe to group members to always have real-time profile photos and names
   useEffect(() => {
@@ -133,8 +146,8 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
       await reserveSpot(match.id, user, profile);
       setSuccess(language === 'ar' ? 'مكانك اتحجز خلاص! هتنزل التشكيلة الأساسية ⚽' : 'Spot confirmed! You are on the roster.');
       setTimeout(() => setSuccess(null), 4000);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to claim spot.');
+    } catch (err: unknown) {
+      setError(getWriteErrorMessage(err, language === 'ar'));
     } finally {
       setActionLoading(null);
     }
@@ -143,30 +156,8 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
   // Handle spot cancellation (Phase 4 auto-reopen)
   const handleCancelSpot = async (targetUserId?: string, targetUserName?: string) => {
     if (!user) return;
-    const isSelf = !targetUserId || targetUserId === user.uid;
-    const name = targetUserName || (language === 'ar' ? 'حسابك' : 'your spot');
-
-    const confirmMsg = isSelf
-      ? (language === 'ar' ? 'متأكد انك عايز تعتذر عن التقسيمة دي؟ المكان هيفتح فوراً لباقي الصحاب في الجروب.' : 'Are you sure you want to cancel your spot? It will immediately reopen for other squad members.')
-      : (language === 'ar' ? `حذف اللاعب ${name} من تشكيلة التقسيمة؟` : `Remove ${name} from this match?`);
-
-    if (!window.confirm(confirmMsg)) {
-      return;
-    }
-
-    setActionLoading(isSelf ? 'cancel_self' : `cancel_${targetUserId}`);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      await cancelSpot(match.id, targetUserId || user.uid, user, isOwner || isAdmin);
-      setSuccess(isSelf ? (language === 'ar' ? 'تم إلغاء حجزك والمكان فضي لباقي اللاعيبة.' : 'Spot cancelled. Slot reopened for the squad.') : `Removed ${name} from roster.`);
-      setTimeout(() => setSuccess(null), 4000);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to cancel spot.');
-    } finally {
-      setActionLoading(null);
-    }
+    setConfirmation({ type: 'cancel_spot', targetUserId, targetUserName });
+    setConfirmationError(null);
   };
 
   // WhatsApp Share with Pre-filled match details
@@ -179,70 +170,42 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  // Concurrency Race Condition Test
-  const handleRunConcurrencyTest = async () => {
-    if (!user || !isAdmin) return;
-    setTestResult(null);
-    setError(null);
-    setActionLoading('test_race');
-
-    try {
-      const dummyUserA: any = { uid: `sim_user_A_${Date.now()}`, displayName: 'Simulated Player A' };
-      const dummyUserB: any = { uid: `sim_user_B_${Date.now()}`, displayName: 'Simulated Player B' };
-
-      const promises = [
-        reserveSpot(match.id, dummyUserA, { id: dummyUserA.uid, displayName: 'Simulated Player A', email: 'a@sim.local', createdAt: '' }),
-        reserveSpot(match.id, dummyUserB, { id: dummyUserB.uid, displayName: 'Simulated Player B', email: 'b@sim.local', createdAt: '' }),
-      ];
-
-      const results = await Promise.allSettled(promises);
-      const fulfilled = results.filter((r) => r.status === 'fulfilled');
-      const rejected = results.filter((r) => r.status === 'rejected');
-
-      setTestResult(
-        language === 'ar'
-          ? `نتيجة اختبار التزامن الذري:\n• نجح في الحجز: ${fulfilled.length}\n• اترفض عشان العدد قفل: ${rejected.length}\n${
-              rejected[0] ? `• سبب الرفض السيرفر: ${(rejected[0] as PromiseRejectedResult).reason?.message}` : ''
-            }`
-          : `Concurrency Test Complete:\n• Successful: ${fulfilled.length}\n• Blocked/Rejected: ${rejected.length}\n${
-              rejected[0] ? `• Error Reason: ${(rejected[0] as PromiseRejectedResult).reason?.message}` : ''
-            }`
-      );
-    } catch (err: any) {
-      setError(`Concurrency test failed: ${err.message}`);
-    } finally {
-      setActionLoading(null);
-    }
+  const handleCancelMatch = () => {
+    if (!isAdmin) return;
+    setCancelReason('');
+    setConfirmationError(null);
+    setConfirmation({ type: 'cancel_match' });
   };
 
-  const handleCancelMatch = async () => {
+  const handleReopenMatch = () => {
     if (!isAdmin) return;
-    const reason = window.prompt(language === 'ar' ? 'سبب إلغاء التقسيمة؟ (مثال: صيانة الملعب أو ظروف جوية)' : 'Reason for cancelling this match? (Optional: e.g. Pitch Maintenance)');
-    if (reason === null) return;
-
-    setActionLoading('cancel_match');
-    setError(null);
-    try {
-      await cancelMatch(match.id, isOwner ? 'owner' : 'admin', reason);
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to cancel match.');
-    } finally {
-      setActionLoading(null);
-    }
+    setConfirmationError(null);
+    setConfirmation({ type: 'reopen_match' });
   };
 
-  const handleReopenMatch = async () => {
-    if (!isAdmin) return;
-    if (!window.confirm(language === 'ar' ? 'إعادة فتح التقسيمة دي للحجز من تاني؟' : 'Reopen this match for booking?')) return;
-
-    setActionLoading('reopen_match');
+  const confirmMatchAction = async () => {
+    if (!user || !confirmation || actionLoading) return;
+    const action = confirmation.type;
+    const targetUserId = confirmation.targetUserId || user.uid;
+    const isSelf = targetUserId === user.uid;
+    const name = confirmation.targetUserName || (language === 'ar' ? 'حسابك' : 'your spot');
+    setActionLoading(action === 'cancel_spot' ? (isSelf ? 'cancel_self' : `cancel_${targetUserId}`) : action);
     setError(null);
+    setConfirmationError(null);
     try {
-      await reopenMatch(match.id, isOwner ? 'owner' : 'admin');
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to reopen match.');
+      if (action === 'cancel_match') {
+        await cancelMatch(match.id, user, isOwner ? 'owner' : 'admin', cancelReason.trim());
+      } else if (action === 'reopen_match') {
+        await reopenMatch(match.id, user, isOwner ? 'owner' : 'admin');
+      } else {
+        await cancelSpot(match.id, targetUserId, user, isOwner || isAdmin);
+        setSuccess(isSelf ? (language === 'ar' ? 'تم إلغاء حجزك والمكان فضي لباقي اللاعيبة.' : 'Spot cancelled. Slot reopened for the squad.') : `Removed ${name} from roster.`);
+        setTimeout(() => setSuccess(null), 4000);
+      }
+      setConfirmation(null);
+      if (action !== 'cancel_spot') onClose();
+    } catch (err: unknown) {
+      setConfirmationError(getWriteErrorMessage(err, language === 'ar'));
     } finally {
       setActionLoading(null);
     }
@@ -606,38 +569,6 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Concurrency Verification Tool (Admin / Dev Test) */}
-          {isAdmin && (
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <TestTube className="w-4 h-4 text-emerald-400" />
-                  <span>{language === 'ar' ? 'اختبار التزامن الذري اللحظي' : 'Phase 4 Concurrency Race Test'}</span>
-                </span>
-                <button
-                  onClick={handleRunConcurrencyTest}
-                  disabled={actionLoading === 'test_race' || isFull || isCancelled}
-                  className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold border border-slate-700 transition-colors cursor-pointer"
-                >
-                  {actionLoading === 'test_race'
-                    ? (language === 'ar' ? 'جاري المحاكاة...' : 'Simulating Race...')
-                    : (language === 'ar' ? 'محاكاة حجزين في نفس اللحظة' : 'Simulate 2 Simultaneous Taps')}
-                </button>
-              </div>
-
-              <p className="text-[11px] text-slate-400">
-                {language === 'ar'
-                  ? 'يرسل حجزين ذريين متزامنين على آخر مكان للتأكد أن واحد فقط ينجح والثاني يُرفض حماية للحد الأقصى (١٢).'
-                  : 'Fires 2 simultaneous atomic transactions targeting the last spot to verify that exactly 1 succeeds and the other is safely rejected.'}
-              </p>
-
-              {testResult && (
-                <pre className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-emerald-300 whitespace-pre-wrap">
-                  {testResult}
-                </pre>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Footer Admin Controls */}
@@ -689,6 +620,53 @@ export const MatchDetailsModal: React.FC<MatchDetailsModalProps> = ({
           </button>
         </div>
       </div>
+      {confirmation && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
+          <form
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="match-confirm-title"
+            onSubmit={(event) => { event.preventDefault(); void confirmMatchAction(); }}
+            className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
+          >
+            <h3 id="match-confirm-title" className="text-lg font-bold text-white">
+              {confirmation.type === 'cancel_match'
+                ? (language === 'ar' ? 'إلغاء التقسيمة؟' : 'Cancel this match?')
+                : confirmation.type === 'reopen_match'
+                  ? (language === 'ar' ? 'إعادة فتح التقسيمة؟' : 'Reopen this match?')
+                  : (language === 'ar' ? 'إلغاء الحجز؟' : 'Cancel this booking?')}
+            </h3>
+            <p className="mt-2 text-sm text-slate-300">
+              {confirmation.type === 'cancel_match'
+                ? (language === 'ar' ? 'الحجز هيتقفل واللاعيبة هيوصلهم تنبيه.' : 'Bookings will close and players will be notified.')
+                : confirmation.type === 'reopen_match'
+                  ? (language === 'ar' ? 'الحجز هيفتح تاني للاعيبة.' : 'Players will be able to book again.')
+                  : (language === 'ar' ? 'المكان هيفتح للاعيبة تاني.' : 'This spot will open for other players.')}
+            </p>
+            {confirmation.type === 'cancel_match' && (
+              <label className="mt-5 block text-sm text-slate-300">
+                {language === 'ar' ? 'السبب (اختياري)' : 'Reason (optional)'}
+                <input
+                  autoFocus
+                  value={cancelReason}
+                  onChange={(event) => setCancelReason(event.target.value)}
+                  maxLength={200}
+                  className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-emerald-400"
+                />
+              </label>
+            )}
+            {confirmationError && <p role="alert" className="mt-4 text-sm text-rose-300">{confirmationError}</p>}
+            <div className="mt-6 flex justify-end gap-2">
+              <button type="button" onClick={() => setConfirmation(null)} disabled={Boolean(actionLoading)} className="rounded-xl bg-slate-800 px-4 py-2 text-sm text-slate-200 disabled:opacity-50">
+                {language === 'ar' ? 'رجوع' : 'Back'}
+              </button>
+              <button type="submit" disabled={Boolean(actionLoading)} className={`rounded-xl px-4 py-2 text-sm font-bold disabled:opacity-50 ${confirmation.type === 'reopen_match' ? 'bg-emerald-400 text-slate-950' : 'bg-rose-600 text-white'}`}>
+                {actionLoading ? (language === 'ar' ? 'جاري التنفيذ...' : 'Working...') : confirmation.type === 'reopen_match' ? (language === 'ar' ? 'إعادة الفتح' : 'Reopen') : (language === 'ar' ? 'تأكيد الإلغاء' : 'Confirm cancellation')}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

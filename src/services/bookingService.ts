@@ -15,6 +15,7 @@ import { db, DEFAULT_GROUP_ID } from '../firebase/config';
 import { handleFirestoreError, OperationType } from '../firebase/errors';
 import { Match, Reservation, UserProfile, Membership } from '../types';
 import { createBroadcastNotification } from './notificationService';
+import { requireFirestoreConnection } from '../firebase/connection';
 
 /**
  * Atomic spot reservation using Firestore transaction
@@ -32,6 +33,7 @@ export async function reserveSpot(
   const now = new Date().toISOString();
 
   try {
+    await requireFirestoreConnection(user, matchRef);
     const reservation = await runTransaction(db, async (transaction) => {
       // 1. Read match document
       const matchDoc = await transaction.get(matchRef);
@@ -119,6 +121,7 @@ export async function cancelSpot(
   const now = new Date().toISOString();
 
   try {
+    await requireFirestoreConnection(caller, matchRef);
     const result = await runTransaction(db, async (transaction) => {
       const matchDoc = await transaction.get(matchRef);
       if (!matchDoc.exists()) throw new Error('Match not found.');

@@ -3,11 +3,7 @@ import { FirebaseError } from 'firebase/app';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
-  ShieldCheck,
-  Zap,
-  Users,
   AlertCircle,
-  ArrowRight,
   Send,
   KeyRound,
 } from 'lucide-react';
@@ -127,26 +123,7 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
               {t.pendingDesc}
             </p>
 
-            <div className="mt-5 p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/80 text-xs text-slate-400 space-y-2 text-start">
-              <div className="flex justify-between items-center">
-                <span>{language === 'ar' ? 'الفرقة' : 'Group'}</span>
-                <span className="text-white font-semibold">PitchPass FC</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{language === 'ar' ? 'حالة الطلب' : 'Status'}</span>
-                <span className="text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
-                  {t.pendingStatusBadge}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{language === 'ar' ? 'الحساب' : 'Account'}</span>
-                <span className="text-slate-200 truncate max-w-[190px]">{user.email}</span>
-              </div>
-            </div>
-
-            <div className="mt-4 p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-[11px] text-slate-400">
-              <span className="text-emerald-400 font-semibold">{t.pendingRealtimeNotice}</span>
-            </div>
+            <p className="mt-4 text-xs text-slate-400">{user.email}</p>
           </>
         ) : isRejected ? (
           <>
@@ -225,63 +202,27 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
   const hasInviteParam = Boolean(inviteCodeInput);
 
   return (
-    <div className="max-w-xl mx-auto my-6 sm:my-10 px-4">
-      {/* Hero Card */}
-      <div className="relative rounded-3xl bg-gradient-to-b from-[#0f1b22] to-[#091014] border border-emerald-950/60 p-6 sm:p-8 shadow-2xl overflow-hidden">
-        {/* Glow backdrop */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full mx-auto py-4 sm:py-8">
+      <div className="relative min-h-[min(70vh,680px)] rounded-3xl bg-gradient-to-b from-[#0f1b22] to-[#091014] border border-slate-800 p-6 sm:p-12 lg:p-16 shadow-2xl overflow-hidden flex items-center">
+        <div className="absolute -top-32 end-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+        <div className="relative z-10 w-full max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
             {hasInviteParam ? t.invitedBadge : t.privateCircleBadge}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black text-white font-display tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white font-display tracking-tight leading-[1.1]">
             {t.heroTitle1} <br />
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
-              {t.heroTitleHighlight}
-            </span>
+            <span className="text-emerald-400">{t.heroTitleHighlight}</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 mt-4 max-w-md mx-auto leading-relaxed">
-            {t.heroSubtitle}
-          </p>
-
           {hasInviteParam && (
-            <div className="my-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs text-slate-300 font-mono">
-              <span className="text-slate-500 font-sans">{language === 'ar' ? 'كود الدعوة:' : 'Code:'}</span>
+            <div className="mt-6 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs font-mono">
+              <span className="text-slate-400 font-sans">{language === 'ar' ? 'كود الدعوة' : 'Invite code'}</span>
               <span className="font-bold text-emerald-400 tracking-wider">{inviteCodeInput}</span>
             </div>
           )}
-
-          {/* Core Feature Badges */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-7 text-start">
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2">
-                <Users className="w-4 h-4" />
-              </div>
-              <h4 className="text-xs font-bold text-white">{t.capFeatureTitle}</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">{t.capFeatureDesc}</p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2">
-                <Zap className="w-4 h-4" />
-              </div>
-              <h4 className="text-xs font-bold text-white">{t.alertFeatureTitle}</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">{t.alertFeatureDesc}</p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h4 className="text-xs font-bold text-white">{t.squadFeatureTitle}</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">{t.squadFeatureDesc}</p>
-            </div>
-          </div>
 
           {/* Sign In CTA */}
           {error && (
@@ -293,7 +234,7 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm tracking-wide shadow-xl shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3 mx-auto cursor-pointer"
+            className="w-full sm:w-auto mt-8 px-8 py-3.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/15 transition-colors flex items-center justify-center gap-3 cursor-pointer"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -318,14 +259,10 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
                   />
                 </svg>
                 <span>{t.signInGoogle}</span>
-                <ArrowRight className="w-4 h-4 text-slate-900 rtl:rotate-180" />
               </>
             )}
           </button>
 
-          <p className="text-[11px] text-slate-400 mt-4">
-            {t.noSmsNeeded}
-          </p>
         </div>
       </div>
     </div>
