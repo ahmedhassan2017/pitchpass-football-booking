@@ -114,9 +114,6 @@ export const UpcomingMatchesView: React.FC = () => {
               {t.scheduledBadge(upcomingMatches.length)}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {t.matchesSubheader}
-          </p>
         </div>
 
         {isAdmin && (
@@ -191,14 +188,6 @@ export const UpcomingMatchesView: React.FC = () => {
               ? (language === 'ar' ? 'مفيش تقسيمات سابقة مسجلة' : 'No Past Matches')
               : (language === 'ar' ? 'مفيش تقسيمات ملغية' : 'No Cancelled Matches')}
           </h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            {filterTab === 'upcoming'
-              ? isAdmin
-                ? t.noUpcomingMatchesDescAdmin
-                : t.noUpcomingMatchesDescMember
-              : (language === 'ar' ? 'التقسيمات هتظهر هنا بعد ما مواعيدها تعدي.' : 'Matches will appear here as dates pass.')}
-          </p>
-
           {isAdmin && filterTab === 'upcoming' && (
             <button
               onClick={() => {

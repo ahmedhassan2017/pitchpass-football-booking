@@ -24,8 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#070b0e]/90 backdrop-blur-md border-b border-emerald-950/40 px-2.5 sm:px-6 py-2 sm:py-3">
-      <div className="max-w-5xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4">
+    <header className="sticky top-0 z-40 bg-[#070b0e]/90 backdrop-blur-md border-b border-slate-800 px-3 sm:px-6 lg:px-8 py-2 sm:py-3">
+      <div className="w-full mx-auto flex items-center justify-between gap-1.5 sm:gap-4">
         {/* Brand & Group */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-400/30 flex-shrink-0">
@@ -44,13 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </>
                 )}
               </span>
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                {t.live}
-              </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium hidden md:block">
-              {t.appSubtitle}
-            </p>
           </div>
         </div>
 

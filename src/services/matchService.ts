@@ -17,6 +17,7 @@ import { db, DEFAULT_GROUP_ID } from '../firebase/config';
 import { handleFirestoreError, OperationType } from '../firebase/errors';
 import { Match, MatchStatus, UserRole } from '../types';
 import { createBroadcastNotification } from './notificationService';
+import { requireFirestoreConnection } from '../firebase/connection';
 
 export interface CreateMatchInput {
   title: string;
@@ -106,6 +107,7 @@ export async function createMatch(
   };
 
   try {
+    await requireFirestoreConnection(user, doc(db, 'groups', newMatch.groupId));
     await setDoc(doc(db, 'matches', matchId), newMatch);
     return newMatch;
   } catch (error) {
@@ -120,6 +122,7 @@ export async function createMatch(
 export async function updateMatch(
   matchId: string,
   input: UpdateMatchInput,
+  user: FirebaseUser,
   userRole: UserRole
 ): Promise<void> {
   if (userRole !== 'owner' && userRole !== 'admin') {
@@ -128,6 +131,7 @@ export async function updateMatch(
 
   const path = `matches/${matchId}`;
   try {
+    await requireFirestoreConnection(user, doc(db, 'matches', matchId));
     const matchSnap = await getDoc(doc(db, 'matches', matchId));
     if (!matchSnap.exists()) {
       throw new Error('Match not found.');
@@ -171,6 +175,7 @@ export async function updateMatch(
  */
 export async function cancelMatch(
   matchId: string,
+  user: FirebaseUser,
   userRole: UserRole,
   reason?: string
 ): Promise<void> {
@@ -180,6 +185,7 @@ export async function cancelMatch(
 
   const path = `matches/${matchId}`;
   try {
+    await requireFirestoreConnection(user, doc(db, 'matches', matchId));
     const matchSnap = await getDoc(doc(db, 'matches', matchId));
     const current = matchSnap.exists() ? (matchSnap.data() as Match) : null;
 
@@ -215,6 +221,7 @@ export async function cancelMatch(
  */
 export async function reopenMatch(
   matchId: string,
+  user: FirebaseUser,
   userRole: UserRole
 ): Promise<void> {
   if (userRole !== 'owner' && userRole !== 'admin') {
@@ -223,6 +230,7 @@ export async function reopenMatch(
 
   const path = `matches/${matchId}`;
   try {
+    await requireFirestoreConnection(user, doc(db, 'matches', matchId));
     const matchSnap = await getDoc(doc(db, 'matches', matchId));
     if (!matchSnap.exists()) throw new Error('Match not found');
     const current = matchSnap.data() as Match;

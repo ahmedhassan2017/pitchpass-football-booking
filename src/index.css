@@ -1,9 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  --color-emerald-300: #c9fa72;
+  --color-emerald-400: #b3f43b;
+  --color-emerald-500: #9bdf28;
+  --color-emerald-600: #7cb622;
+  --color-emerald-700: #5b861c;
+  --color-emerald-800: #38551a;
+  --color-emerald-900: #243c18;
+  --color-emerald-950: #172716;
+  --color-teal-300: #c9fa72;
+  --color-teal-400: #b3f43b;
+  --color-teal-500: #9bdf28;
+  --color-teal-600: #7cb622;
+  --color-teal-700: #5b861c;
+  --color-teal-950: #172716;
+  --color-slate-950: #090d1a;
+  --color-slate-900: #111624;
+  --color-slate-800: #242b3c;
+  --color-slate-700: #364055;
+  --color-slate-600: #586276;
+  --color-slate-500: #7e8798;
+  --color-slate-400: #9ca5b4;
+  --color-slate-300: #c4cbd7;
+  --color-slate-200: #e1e6ed;
+  --color-slate-100: #f4f6fa;
+}
+
 @layer base {
   body {
     font-family: 'Alan Sans', 'Alexandria', 'Cairo', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #070b0e;
+    background-color: #090d1a;
     color: #f1f5f9;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -33,14 +60,14 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1418;
+  background: #090d1a;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f2e35;
+  background: #2b3447;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a3e47;
+  background: #3c485f;
 }
 
 /* Glow effects */
@@ -53,7 +80,21 @@
 }
 
 .pitch-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 0%, rgba(179, 244, 59, 0.055) 0%, transparent 58%);
+}
+
+html.dark [class*="bg-[#070b0e]"] {
+  background-color: #090d1a;
+}
+
+html.dark [class*="bg-[#0d151a]"],
+html.dark [class*="bg-[#0e161c]"],
+html.dark [class*="bg-[#141f26]"] {
+  background-color: #141a2a;
+}
+
+html.dark [class*="from-[#0f1b22]"] {
+  background: linear-gradient(145deg, #151b2b, #0c1120);
 }
 
 /* Light Mode Overrides */
@@ -212,10 +253,10 @@ html.light textarea::placeholder {
 html.light input:focus,
 html.light textarea:focus,
 html.light select:focus {
-  border-color: #10b981 !important;
+  border-color: #7cb622 !important;
   background-color: #ffffff !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(155, 223, 40, 0.2) !important;
 }
 
 /* Borders */
@@ -235,13 +276,16 @@ html.light .text-white {
   color: #0f172a !important;
 }
 
-/* Keep text white on primary emerald/dark buttons and filled badges */
+/* Lime buttons need dark text in light mode for legibility. */
 html.light button[class~="bg-emerald-500"],
 html.light button[class~="bg-emerald-600"],
 html.light button[class~="bg-teal-600"],
 html.light [class*="bg-emerald-500"] > .text-white,
 html.light [class*="bg-emerald-600"] > .text-white,
-html.light [class*="bg-gradient-to-br from-emerald-500"] .text-white,
+html.light [class*="bg-gradient-to-br from-emerald-500"] .text-white {
+  color: #111624 !important;
+}
+
 html.light .keep-white {
   color: #ffffff !important;
 }
@@ -268,11 +312,11 @@ html.light [class*="text-slate-600"] {
 }
 
 html.light .text-emerald-400 {
-  color: #059669 !important;
+  color: #4d7516 !important;
 }
 
 html.light .text-emerald-300 {
-  color: #047857 !important;
+  color: #3d6110 !important;
 }
 
 html.light .text-rose-300,

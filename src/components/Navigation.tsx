@@ -26,8 +26,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   return (
     <>
       {/* Desktop Navigation Tabs */}
-      <div className="hidden sm:block border-b border-slate-900 bg-[#070b0e]/70">
-        <div className="max-w-5xl mx-auto px-6">
+      <div className="hidden sm:block border-b border-slate-800 bg-[#070b0e]/70">
+        <div className="w-full mx-auto px-0">
           <nav className="flex gap-1" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon;

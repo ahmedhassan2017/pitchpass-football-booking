@@ -233,9 +233,6 @@ export const SquadView: React.FC = () => {
               {t.activePlayersCount(approvedMembers.length)}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {t.squadSubheader}
-          </p>
         </div>
 
         {/* WhatsApp Invite Quick CTA */}

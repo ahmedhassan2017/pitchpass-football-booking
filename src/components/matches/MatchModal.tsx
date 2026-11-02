@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { X, Calendar, Clock, MapPin, Users, FileText, AlertCircle, Check } from 'lucide-react';
 import { Match } from '../../types';
 import { createMatch, updateMatch } from '../../services/matchService';
+import { getWriteErrorMessage } from '../../firebase/connection';
 
 interface MatchModalProps {
   isOpen: boolean;
@@ -112,6 +113,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
             maxPlayers,
             notes,
           },
+          user,
           isOwner ? 'owner' : 'admin'
         );
       } else {
@@ -131,8 +133,8 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 
       if (onSuccess) onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to save match.');
+    } catch (err: unknown) {
+      setError(getWriteErrorMessage(err, isRTL));
     } finally {
       setLoading(false);
     }
