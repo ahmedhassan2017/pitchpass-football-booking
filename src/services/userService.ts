@@ -91,19 +91,15 @@ export async function syncUserProfile(user: FirebaseUser): Promise<UserProfile> 
         lastLoginAt: now,
       });
 
-      // Keep membership in sync as well so squad list reflects custom avatar immediately
+      // Update an existing membership without creating an incomplete one before an invite request.
       const memRef = doc(db, 'memberships', `${DEFAULT_GROUP_ID}_${user.uid}`);
       try {
-        await setDoc(
-          memRef,
-          {
-            displayName: resolvedDisplayName,
-            photoURL: resolvedPhotoURL,
-          },
-          { merge: true }
-        );
+        await updateDoc(memRef, {
+          displayName: resolvedDisplayName,
+          photoURL: resolvedPhotoURL,
+        });
       } catch (memErr) {
-        // Safe to ignore if membership doc doesn't exist yet
+        // A user may have a profile before requesting membership.
       }
 
       try {
@@ -181,18 +177,14 @@ export async function updateUserProfile(
     };
     await setDoc(userRef, updatedUserData, { merge: true });
 
-    // 4. Update Membership record if present so squad roster immediately displays new name and avatar
+    // 4. Update an existing membership without creating a partial record.
     const membershipId = `${DEFAULT_GROUP_ID}_${uid}`;
     const membershipRef = doc(db, 'memberships', membershipId);
     try {
-      await setDoc(
-        membershipRef,
-        {
-          displayName: cleanName,
-          photoURL: cleanPhoto,
-        },
-        { merge: true }
-      );
+      await updateDoc(membershipRef, {
+        displayName: cleanName,
+        photoURL: cleanPhoto,
+      });
     } catch (memErr) {
       console.warn('Membership update skipped or notice:', memErr);
     }

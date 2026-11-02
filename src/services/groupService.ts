@@ -98,21 +98,23 @@ export async function submitJoinRequest(
     // 2. Check if membership already exists
     const memSnap = await getDoc(doc(db, 'memberships', membershipId));
     if (memSnap.exists()) {
-      const existing = memSnap.data() as Membership;
-      // If was previously rejected or left, reset to pending
-      if (existing.status === 'rejected') {
-        await updateDoc(doc(db, 'memberships', membershipId), {
-          status: 'pending',
-          requestedAt: new Date().toISOString(),
-          reviewedAt: null,
-          reviewedBy: null,
-        });
-        return { ...existing, status: 'pending' };
+      const existing = memSnap.data() as Partial<Membership>;
+      if (existing.status === 'approved') {
+        return existing as Membership;
       }
-      return existing;
+      if (
+        existing.status === 'pending' &&
+        existing.groupId === groupId &&
+        existing.userId === user.uid &&
+        existing.role === 'member' &&
+        existing.requestedAt
+      ) {
+        return existing as Membership;
+      }
     }
 
-    // 3. Create fresh pending membership
+    // 3. Create or repair a pending membership. Older profile syncs could leave
+    // a document containing only displayName and photoURL.
     const newMembership: Membership = {
       id: membershipId,
       groupId,

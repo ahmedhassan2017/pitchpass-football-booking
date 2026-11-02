@@ -41,8 +41,26 @@ function getGoogleSignInError(error: unknown, language: 'ar' | 'en'): string {
   return error instanceof Error ? error.message : 'Could not complete Google sign-in. Please try again.';
 }
 
+function getJoinRequestError(error: unknown, language: 'ar' | 'en'): string {
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  let message = rawMessage;
+  try {
+    const details = JSON.parse(rawMessage);
+    if (details && typeof details.error === 'string') message = details.error;
+  } catch {
+    // Validation errors are already plain text.
+  }
+
+  if (/permission-denied|missing or insufficient permissions/i.test(message)) {
+    return language === 'ar'
+      ? 'تعذر إرسال طلب الانضمام بسبب صلاحيات قاعدة البيانات. تواصل مع مسؤول المجموعة.'
+      : 'Could not send the join request because database access was denied. Contact the group admin.';
+  }
+  return message;
+}
+
 export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
-  const { user, membership, isApproved, signIn, signOut, requestJoinWithCode } = useAuth();
+  const { user, membership, isApproved, joinError, signIn, signOut, requestJoinWithCode } = useAuth();
   const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +97,8 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
     setError(null);
     try {
       await requestJoinWithCode(inviteCodeInput.trim().toUpperCase());
-    } catch (err: any) {
-      setError(err?.message || 'Failed to submit join request. Please verify the invite code.');
+    } catch (err: unknown) {
+      setError(getJoinRequestError(err, language));
     } finally {
       setJoinSubmitting(false);
     }
@@ -90,9 +108,15 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
   if (user && !isApproved) {
     const isPending = membership?.status === 'pending';
     const isRejected = membership?.status === 'rejected';
+    const joinRequestError = error || (joinError && getJoinRequestError(joinError, language));
 
     return (
       <div className="max-w-md mx-auto my-10 p-6 rounded-3xl bg-[#0e161c] border border-slate-800 shadow-2xl text-center">
+        {joinRequestError && (
+          <div role="alert" className="mb-4 p-2.5 rounded-xl bg-rose-950/50 border border-rose-800 text-rose-300 text-xs">
+            {joinRequestError}
+          </div>
+        )}
         {isPending ? (
           <>
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400 mb-4 animate-pulse">
@@ -160,12 +184,6 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
             <p className="text-xs text-slate-300 mt-2 leading-relaxed">
               {t.enterInviteCodeDesc}
             </p>
-
-            {error && (
-              <div className="mt-3 p-2.5 rounded-xl bg-rose-950/50 border border-rose-800 text-rose-300 text-xs">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={handleManualJoin} className="mt-4 space-y-3">
               <input
