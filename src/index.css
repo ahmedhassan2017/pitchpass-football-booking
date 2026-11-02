@@ -236,9 +236,9 @@ html.light .text-white {
 }
 
 /* Keep text white on primary emerald/dark buttons and filled badges */
-html.light button[class*="bg-emerald-500"],
-html.light button[class*="bg-emerald-600"],
-html.light button[class*="bg-teal-600"],
+html.light button[class~="bg-emerald-500"],
+html.light button[class~="bg-emerald-600"],
+html.light button[class~="bg-teal-600"],
 html.light [class*="bg-emerald-500"] > .text-white,
 html.light [class*="bg-emerald-600"] > .text-white,
 html.light [class*="bg-gradient-to-br from-emerald-500"] .text-white,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FirebaseError } from 'firebase/app';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -13,6 +14,31 @@ import {
 
 interface GuestGateProps {
   onSignedIn?: () => void;
+}
+
+function getGoogleSignInError(error: unknown, language: 'ar' | 'en'): string {
+  const code = error instanceof FirebaseError ? error.code : null;
+  const hostname = window.location.hostname;
+
+  if (code === 'auth/unauthorized-domain') {
+    return language === 'ar'
+      ? `العنوان ${hostname} غير مسموح به في Firebase Authentication. أضفه من Settings > Authorized domains.`
+      : `${hostname} is not allowed in Firebase Authentication. Add it under Settings > Authorized domains.`;
+  }
+
+  if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+    return language === 'ar'
+      ? 'المتصفح منع نافذة تسجيل الدخول. افتح التطبيق في Chrome أو Edge واسمح بالنوافذ المنبثقة.'
+      : 'The browser blocked Google sign-in. Open the app in Chrome or Edge and allow popups.';
+  }
+
+  if (code === 'auth/operation-not-allowed') {
+    return language === 'ar'
+      ? 'تسجيل الدخول بجوجل غير مفعّل في إعدادات Firebase Authentication.'
+      : 'Google sign-in is not enabled in Firebase Authentication.';
+  }
+
+  return error instanceof Error ? error.message : 'Could not complete Google sign-in. Please try again.';
 }
 
 export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
@@ -37,9 +63,9 @@ export const GuestGate: React.FC<GuestGateProps> = ({ onSignedIn }) => {
     try {
       await signIn();
       if (onSignedIn) onSignedIn();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err?.message || 'Could not complete Google Sign-in. Please try again.');
+      setError(getGoogleSignInError(err, language));
     } finally {
       setLoading(false);
     }
