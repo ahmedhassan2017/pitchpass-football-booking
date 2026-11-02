@@ -236,6 +236,25 @@ html.light [class*="from-slate-900"] {
   background: linear-gradient(to right, #ffffff, #f8fafc) !important;
 }
 
+/* Notification gradients must replace the dark background image, not just its color. */
+html.light .alert-card-cancelled {
+  background: linear-gradient(105deg, #fff1f2, #ffffff 72%) !important;
+  border-color: #fda4af !important;
+  box-shadow: 0 4px 18px rgba(190, 24, 93, 0.08) !important;
+}
+
+html.light .alert-card-opening {
+  background: linear-gradient(105deg, #f7fee7, #ffffff 72%) !important;
+  border-color: #bef264 !important;
+  box-shadow: 0 4px 18px rgba(77, 117, 22, 0.08) !important;
+}
+
+html.light .alert-card-read {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  opacity: 0.8;
+}
+
 /* Inputs, Textareas, Selects */
 html.light input,
 html.light textarea,

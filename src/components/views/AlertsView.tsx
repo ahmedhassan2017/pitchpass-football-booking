@@ -237,11 +237,11 @@ export const AlertsView: React.FC = () => {
                 className={`group relative p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer ${
                   isUnread
                     ? isCancellation
-                      ? 'bg-gradient-to-r from-emerald-950/60 via-slate-900/90 to-[#0e161c] border-emerald-500/60 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+                      ? 'alert-card-opening bg-gradient-to-r from-emerald-950/60 via-slate-900/90 to-[#0e161c] border-emerald-500/60 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/30'
                       : isMatchCancelled
-                      ? 'bg-gradient-to-r from-rose-950/50 via-slate-900/90 to-[#0e161c] border-rose-500/50 shadow-lg shadow-rose-950/30 ring-1 ring-rose-500/30'
+                      ? 'alert-card-cancelled bg-gradient-to-r from-rose-950/50 via-slate-900/90 to-[#0e161c] border-rose-500/50 shadow-lg shadow-rose-950/30 ring-1 ring-rose-500/30'
                       : 'bg-slate-900/95 border-emerald-500/40 shadow-md ring-1 ring-emerald-500/20'
-                    : 'bg-slate-950/35 border-slate-900/80 opacity-40 hover:opacity-85 transition-opacity'
+                    : 'alert-card-read bg-slate-950/35 border-slate-900/80 opacity-40 hover:opacity-85 transition-opacity'
                 }`}
               >
                 <div className="flex items-start gap-3.5">
