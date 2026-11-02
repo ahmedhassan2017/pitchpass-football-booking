@@ -23,31 +23,43 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
-// Preset football player avatar SVGs / URLs
+// Bundled portraits keep preset avatars available on every deployed origin.
 const FOOTBALL_PRESETS = [
   {
-    name: 'الهداف (Striker)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=striker9&backgroundColor=059669',
+    nameAr: 'الهداف',
+    nameEn: 'Striker',
+    url: '/assets/avatars/striker.jpg',
+    glow: '#10b981',
   },
   {
-    name: 'الكابتن (Captain)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=captain10&backgroundColor=0284c7',
+    nameAr: 'الكابتن',
+    nameEn: 'Captain',
+    url: '/assets/avatars/captain.jpg',
+    glow: '#3b82f6',
   },
   {
-    name: 'الحارس (Keeper)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=keeper1&backgroundColor=e11d48',
+    nameAr: 'الحارس',
+    nameEn: 'Keeper',
+    url: '/assets/avatars/keeper.jpg',
+    glow: '#f43f5e',
   },
   {
-    name: 'صانع الألعاب (Playmaker)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=playmaker8&backgroundColor=d97706',
+    nameAr: 'صانع اللعب',
+    nameEn: 'Playmaker',
+    url: '/assets/avatars/playmaker.jpg',
+    glow: '#f59e0b',
   },
   {
-    name: 'الجناح (Winger)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=winger7&backgroundColor=7c3aed',
+    nameAr: 'الجناح',
+    nameEn: 'Winger',
+    url: '/assets/avatars/winger.jpg',
+    glow: '#a855f7',
   },
   {
-    name: 'المدافع (Defender)',
-    url: 'https://api.dicebear.com/7.x/bottts/svg?seed=defender4&backgroundColor=475569',
+    nameAr: 'المدافع',
+    nameEn: 'Defender',
+    url: '/assets/avatars/defender.jpg',
+    glow: '#94a3b8',
   },
 ];
 
@@ -309,29 +321,36 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                   </div>
                 </div>
 
-                {/* Preset Avatars */}
-                <div className="mt-3">
-                  <span className="text-[11px] font-semibold text-slate-400 block mb-1.5">
-                    {isRTL ? 'أو اختر شخصية جاهزة:' : 'Or pick a preset avatar:'}
+                {/* Football legend portraits */}
+                <div className="mt-4">
+                  <span className="text-xs font-bold text-slate-300 block mb-2">
+                    {isRTL ? 'اختر نجمك في الملعب' : 'Choose your pitch legend'}
                   </span>
-                  <div className="grid grid-cols-6 gap-2">
-                    {FOOTBALL_PRESETS.map((preset, idx) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {FOOTBALL_PRESETS.map((preset) => (
                       <button
-                        key={idx}
+                        key={preset.url}
                         type="button"
                         onClick={() => setPhotoURL(preset.url)}
-                        title={preset.name}
-                        className={`p-1 rounded-xl border transition-all cursor-pointer ${
+                        aria-label={`${isRTL ? preset.nameAr : preset.nameEn} ${isRTL ? 'صورة شخصية' : 'avatar'}`}
+                        aria-pressed={photoURL === preset.url}
+                        className={`min-w-0 p-2 rounded-2xl border transition-all cursor-pointer flex flex-col items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                           photoURL === preset.url
-                            ? 'border-emerald-400 bg-emerald-500/20 ring-2 ring-emerald-500/40'
-                            : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-800'
+                            ? 'border-emerald-400 bg-emerald-500/15 ring-2 ring-emerald-500/40'
+                            : 'border-slate-800 bg-slate-900/60 hover:border-emerald-500/50 hover:bg-slate-800'
                         }`}
                       >
                         <img
                           src={preset.url}
-                          alt={preset.name}
-                          className="w-full aspect-square rounded-full object-cover"
+                          alt=""
+                          width={80}
+                          height={80}
+                          className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-full object-cover border-2"
+                          style={{ borderColor: preset.glow, boxShadow: `0 0 18px ${preset.glow}55` }}
                         />
+                        <span className="text-[11px] font-bold text-slate-200 truncate max-w-full">
+                          {isRTL ? preset.nameAr : preset.nameEn}
+                        </span>
                       </button>
                     ))}
                   </div>
