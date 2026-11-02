@@ -1,11 +1,17 @@
 // PitchPass PWA Service Worker
-const CACHE_NAME = 'pitchpass-v1';
+const CACHE_NAME = 'pitchpass-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/icon-192.svg',
   '/icon-512.svg',
+  '/assets/avatars/striker.jpg',
+  '/assets/avatars/captain.jpg',
+  '/assets/avatars/keeper.jpg',
+  '/assets/avatars/playmaker.jpg',
+  '/assets/avatars/winger.jpg',
+  '/assets/avatars/defender.jpg',
 ];
 
 self.addEventListener('install', (event) => {
