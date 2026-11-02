@@ -21,6 +21,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   membership: Membership | null;
   group: Group | null;
+  joinError: string | null;
   loading: boolean;
   isOwner: boolean;
   isAdmin: boolean;
@@ -40,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Check URL query parameters for invite code
@@ -62,7 +64,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let unsubscribeMembership: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      if (unsubscribeMembership) {
+        unsubscribeMembership();
+        unsubscribeMembership = null;
+      }
       setUser(currentUser);
+      setJoinError(null);
 
       if (currentUser) {
         const isDesignatedOwner =
@@ -133,12 +140,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const existingMem = await fetchUserMembership(currentUser.uid);
               const urlCode = getInviteCodeFromUrl();
 
-              if (!existingMem && urlCode) {
+              if (urlCode && (!existingMem || !existingMem.status || !existingMem.groupId)) {
                 try {
                   const newMem = await submitJoinRequest(currentUser, urlCode);
                   setMembership(newMem);
                 } catch (inviteErr) {
                   console.warn('Invite code request error:', inviteErr);
+                  setJoinError(inviteErr instanceof Error ? inviteErr.message : String(inviteErr));
                 }
               } else if (existingMem) {
                 setMembership(existingMem);
@@ -154,9 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               currentUser.uid,
               DEFAULT_GROUP_ID,
               (mem) => {
-                if (mem) {
-                  setMembership(mem);
-                }
+                setMembership(mem);
               }
             );
           } catch (err) {
@@ -222,6 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleRequestJoinWithCode = async (code: string) => {
     if (!user) throw new Error('You must be signed in to join.');
+    setJoinError(null);
     const newMem = await submitJoinRequest(user, code, DEFAULT_GROUP_ID);
     setMembership(newMem);
     return newMem;
@@ -290,6 +297,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         membership,
         group,
+        joinError,
         loading,
         isOwner,
         isAdmin,

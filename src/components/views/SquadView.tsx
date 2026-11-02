@@ -57,12 +57,17 @@ export const SquadView: React.FC = () => {
       },
       (err) => {
         console.error('Error fetching memberships:', err);
+        setErrorMsg(
+          isRTL
+            ? `تعذر تحميل طلبات الانضمام: ${err.message}`
+            : `Could not load join requests: ${err.message}`
+        );
         setLoadingMembers(false);
       }
     );
 
     return () => unsubscribe();
-  }, [group?.id]);
+  }, [group?.id, isRTL]);
 
   const approvedMembers = members.filter((m) => m.status === 'approved');
   const pendingMembers = members.filter((m) => m.status === 'pending');
@@ -413,7 +418,11 @@ export const SquadView: React.FC = () => {
             </span>
           </div>
 
-          {pendingMembers.length === 0 ? (
+          {loadingMembers ? (
+            <div className="p-8 text-center text-xs text-slate-400">
+              {isRTL ? 'جاري تحميل طلبات الانضمام...' : 'Loading join requests...'}
+            </div>
+          ) : pendingMembers.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-400">
               <UserCheck className="w-8 h-8 text-slate-600 mx-auto mb-2" />
               {t.allRequestsReviewed}
